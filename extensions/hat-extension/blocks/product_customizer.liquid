@@ -5,13 +5,20 @@
   <img id="pc-preview-img" alt="">
 </div>
 
+{%- assign coll = block.settings.source_collection -%}
 <div id="image-switcher-root" class="pc-grid">
-  {%- assign limit = block.settings.max_images | default: 20 -%}
-  {%- for hat in collections['hats'].products limit: limit -%}
-    <button class="pc-choice" data-index="{{ forloop.index }}" data-src="{{ hat.featured_image | image_url: width: 1600 }}">
-      <img src="{{ hat.featured_image | image_url: width: 320 }}" alt="{{ hat.title | escape }}">
-    </button>
-  {%- endfor -%}
+  {%- if coll and coll.products_count > 0 -%}
+    {%- for p in coll.products -%}
+      {%- if p.featured_image != blank -%}
+        <button class="pc-choice"
+                data-index="{{ forloop.index }}"
+                data-src="{{ p.featured_image | image_url: width: 1600 }}"
+                data-handle="{{ p.handle }}">
+          <img src="{{ p.featured_image | image_url: width: 320 }}" alt="{{ p.title | escape }}">
+        </button>
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
 </div>
 
 {% schema %}
@@ -20,7 +27,7 @@
   "target": "section",
   "templates": ["product"],
   "settings": [
-    { "type": "range", "id": "max_images", "label": "Max hats to show", "min": 1, "max": 50, "step": 1, "default": 20 }
+    { "type": "collection", "id": "source_collection", "label": "Collection to display" }
   ]
 }
 {% endschema %}
