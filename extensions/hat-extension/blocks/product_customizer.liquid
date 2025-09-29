@@ -1,0 +1,16 @@
+<p>{{ block.settings.title }}</p>
+
+{% schema %}
+{
+    "name": "Product Customizer",
+    "target": "section",
+    "settings": [
+        {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "Hello world"
+        }
+    ]
+}
+{% endschema %}
