@@ -2,8 +2,6 @@
 
 Custom Shopify integration that allows customers to design hats with drag-and-drop patches, rotation, scaling, and layer ordering. Built as a **Shopify app** with a **Theme App Extension**, **Cart Transform Function**, and a rendering service to produce production-ready files.
 
----
-
 ## Features
 
 - **Hat configurator UI** (React + Konva.js)
@@ -31,8 +29,6 @@ Custom Shopify integration that allows customers to design hats with drag-and-dr
   - **Patch products**: hidden SKUs with SVG/PNG assets and pricing.
   - **Design JSON**: deterministic record of patch placement, size, rotation, and order.
 
----
-
 ## Tech Stack
 
 - **Frontend**: React + Konva.js (Theme App Extension)
@@ -41,8 +37,4 @@ Custom Shopify integration that allows customers to design hats with drag-and-dr
 - **Rendering**: Sharp / ResVG
 - **Server**: Node.js or Cloudflare Workers
 - **Storage**: Shopify Files API (or optional S3/R2 for lifecycle control)
-
-4. Deploy function
-
-```shopify app deploy
 
