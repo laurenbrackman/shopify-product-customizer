@@ -95,34 +95,21 @@ export default function Index() {
 
   return (
     <s-page>
-      <ui-title-bar title="React Router app template">
+      <ui-title-bar title="Hat Customizer App">
         <button variant="primary" onClick={generateProduct}>
           Generate a product
         </button>
       </ui-title-bar>
 
-      <s-section heading="Congrats on creating a new Shopify app 🎉">
-        <s-paragraph>
-          This embedded app template uses{" "}
+      <s-section heading="Welcome to Your Hat Customizer App!">
+        <s-paragraph>This app was created by {" "}
           <s-link
-            href="https://shopify.dev/docs/apps/tools/app-bridge"
+            href="https://www.laurenbrackman.com"
             target="_blank"
-          >
-            App Bridge
-          </s-link>{" "}
-          interface examples like an{" "}
-          <s-link href="/app/additional">additional page in the app nav</s-link>
-          , as well as an{" "}
-          <s-link
-            href="https://shopify.dev/docs/api/admin-graphql"
-            target="_blank"
-          >
-            Admin GraphQL
-          </s-link>{" "}
-          mutation demo, to provide a starting point for app development.
-        </s-paragraph>
+          >Lauren Brackman Websites
+          </s-link>{" "}.</s-paragraph>
       </s-section>
-      <s-section heading="Get started with products">
+      <s-section heading="Generate a Random Product">
         <s-paragraph>
           Generate a product with GraphQL and get the JSON output for that
           product. Learn more about the{" "}
@@ -212,29 +199,6 @@ export default function Index() {
             Prisma
           </s-link>
         </s-paragraph>
-      </s-section>
-
-      <s-section slot="aside" heading="Next steps">
-        <s-unordered-list>
-          <s-list-item>
-            Build an{" "}
-            <s-link
-              href="https://shopify.dev/docs/apps/getting-started/build-app-example"
-              target="_blank"
-            >
-              example app
-            </s-link>
-          </s-list-item>
-          <s-list-item>
-            Explore Shopify&apos;s API with{" "}
-            <s-link
-              href="https://shopify.dev/docs/apps/tools/graphiql-admin-api"
-              target="_blank"
-            >
-              GraphiQL
-            </s-link>
-          </s-list-item>
-        </s-unordered-list>
       </s-section>
     </s-page>
   );
