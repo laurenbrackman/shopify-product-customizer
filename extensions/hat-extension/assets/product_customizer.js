@@ -1,11 +1,13 @@
-(function () {
-  const root = document.getElementById('color-switcher-root');
+document.addEventListener('DOMContentLoaded', () => {
+  const root = document.getElementById('image-switcher-root');
   if (!root) return;
 
-  root.querySelectorAll('button').forEach(btn => {
+  const buttons = root.querySelectorAll('.pc-choice');
+
+  buttons.forEach(btn => {
     btn.addEventListener('click', () => {
-      const color = btn.dataset.color;
-      btn.style.backgroundColor = color;
+      buttons.forEach(b => b.classList.remove('is-selected'));
+      btn.classList.add('is-selected');
     });
   });
-})();
+});

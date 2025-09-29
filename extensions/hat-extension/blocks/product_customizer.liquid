@@ -2,25 +2,40 @@
 
 <p class="custom-hat-builder-app">{{ block.settings.title }}</p>
 
-<div id="color-switcher-root">
-  <button data-color="red">Red</button>
-  <button data-color="green">Green</button>
-  <button data-color="blue">Blue</button>
+<div id="image-switcher-root" class="pc-grid">
+  {%- if block.settings.img1 != blank -%}
+    <button class="pc-choice" data-index="1">
+      <img src="{{ block.settings.img1 | image_url: width: 320 }}" alt="{{ block.settings.alt1 | escape }}">
+    </button>
+  {%- endif -%}
+
+  {%- if block.settings.img2 != blank -%}
+    <button class="pc-choice" data-index="2">
+      <img src="{{ block.settings.img2 | image_url: width: 320 }}" alt="{{ block.settings.alt2 | escape }}">
+    </button>
+  {%- endif -%}
+
+  {%- if block.settings.img3 != blank -%}
+    <button class="pc-choice" data-index="3">
+      <img src="{{ block.settings.img3 | image_url: width: 320 }}" alt="{{ block.settings.alt3 | escape }}">
+    </button>
+  {%- endif -%}
 </div>
 
 {% schema %}
 {
-    "name": "Product Customizer",
-    "target": "section",
-    "settings": [
-        {
-            "type": "text",
-            "id": "title",
-            "label": "Title",
-            "default": "Hello world"
-        }
-    ],
-    "templates": ["product"]
+  "name": "Product Customizer",
+  "target": "section",
+  "templates": ["product"],
+  "settings": [
+    { "type": "text", "id": "title", "label": "Title", "default": "Choose an option" },
+    { "type": "image_picker", "id": "img1", "label": "Button 1 image" },
+    { "type": "text", "id": "alt1", "label": "Button 1 alt text", "default": "Option 1" },
+    { "type": "image_picker", "id": "img2", "label": "Button 2 image" },
+    { "type": "text", "id": "alt2", "label": "Button 2 alt text", "default": "Option 2" },
+    { "type": "image_picker", "id": "img3", "label": "Button 3 image" },
+    { "type": "text", "id": "alt3", "label": "Button 3 alt text", "default": "Option 3" }
+  ]
 }
 {% endschema %}
 
