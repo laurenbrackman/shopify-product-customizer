@@ -1,25 +1,17 @@
 {{ 'product_customizer.css' | asset_url | stylesheet_tag }}
 
-<p class="custom-hat-builder-app">{{ block.settings.title }}</p>
+<div class="pc-preview" id="pc-preview" aria-hidden="true">
+  <button class="pc-preview-close" type="button" aria-label="Close preview">×</button>
+  <img id="pc-preview-img" alt="">
+</div>
 
 <div id="image-switcher-root" class="pc-grid">
-  {%- if block.settings.img1 != blank -%}
-    <button class="pc-choice" data-index="1">
-      <img src="{{ block.settings.img1 | image_url: width: 320 }}" alt="{{ block.settings.alt1 | escape }}">
+  {%- assign limit = block.settings.max_images | default: 20 -%}
+  {%- for hat in collections['hats'].products limit: limit -%}
+    <button class="pc-choice" data-index="{{ forloop.index }}" data-src="{{ hat.featured_image | image_url: width: 1600 }}">
+      <img src="{{ hat.featured_image | image_url: width: 320 }}" alt="{{ hat.title | escape }}">
     </button>
-  {%- endif -%}
-
-  {%- if block.settings.img2 != blank -%}
-    <button class="pc-choice" data-index="2">
-      <img src="{{ block.settings.img2 | image_url: width: 320 }}" alt="{{ block.settings.alt2 | escape }}">
-    </button>
-  {%- endif -%}
-
-  {%- if block.settings.img3 != blank -%}
-    <button class="pc-choice" data-index="3">
-      <img src="{{ block.settings.img3 | image_url: width: 320 }}" alt="{{ block.settings.alt3 | escape }}">
-    </button>
-  {%- endif -%}
+  {%- endfor -%}
 </div>
 
 {% schema %}
@@ -28,13 +20,7 @@
   "target": "section",
   "templates": ["product"],
   "settings": [
-    { "type": "text", "id": "title", "label": "Title", "default": "Choose an option" },
-    { "type": "image_picker", "id": "img1", "label": "Button 1 image" },
-    { "type": "text", "id": "alt1", "label": "Button 1 alt text", "default": "Option 1" },
-    { "type": "image_picker", "id": "img2", "label": "Button 2 image" },
-    { "type": "text", "id": "alt2", "label": "Button 2 alt text", "default": "Option 2" },
-    { "type": "image_picker", "id": "img3", "label": "Button 3 image" },
-    { "type": "text", "id": "alt3", "label": "Button 3 alt text", "default": "Option 3" }
+    { "type": "range", "id": "max_images", "label": "Max hats to show", "min": 1, "max": 50, "step": 1, "default": 20 }
   ]
 }
 {% endschema %}

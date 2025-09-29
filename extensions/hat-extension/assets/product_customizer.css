@@ -1,9 +1,38 @@
-.pc-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(80px, 1fr));
-  gap: 12px;
+.pc-preview {
+  display: none;
+  position: relative;
+  margin-bottom: 14px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px;
 }
 
+.pc-preview.is-open { display: block; }
+.pc-preview img {
+  display: block;
+  width: 100%;
+  max-height: 50vh;
+  object-fit: contain;}
+.pc-preview-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  border: 0;
+  background: #111;
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.pc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 12px;
+}
 .pc-choice {
   padding: 0;
   border: 2px solid #ddd;
@@ -12,13 +41,11 @@
   cursor: pointer;
   overflow: hidden;
 }
-
 .pc-choice img {
   display: block;
   width: 100%;
   height: auto;
 }
-
 .pc-choice.is-selected {
   border-color: #111;
   box-shadow: 0 0 0 2px #111 inset;
