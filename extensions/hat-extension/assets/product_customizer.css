@@ -9,3 +9,15 @@ p.custom-hat-builder-app {
     background-color: #ECEFF1;
     color: #263238;
   }
+
+  #color-switcher-root button {
+  margin: 0 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: pink;
+  border: none;
+ }
+
+#color-switcher-root button:hover {
+  background-color: #90A4AE;
+}

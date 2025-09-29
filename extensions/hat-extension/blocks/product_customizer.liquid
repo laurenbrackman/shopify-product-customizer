@@ -2,6 +2,12 @@
 
 <p class="custom-hat-builder-app">{{ block.settings.title }}</p>
 
+<div id="color-switcher-root">
+  <button data-color="red">Red</button>
+  <button data-color="green">Green</button>
+  <button data-color="blue">Blue</button>
+</div>
+
 {% schema %}
 {
     "name": "Product Customizer",
@@ -13,6 +19,9 @@
             "label": "Title",
             "default": "Hello world"
         }
-    ]
+    ],
+    "templates": ["product"]
 }
 {% endschema %}
+
+{{ 'product_customizer.js' | asset_url | script_tag }}
