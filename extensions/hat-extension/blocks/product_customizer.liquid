@@ -32,16 +32,6 @@
                   {%- if p.metafields.custom.width -%}data-width="{{ p.metafields.custom.width.value }}"{%- endif -%}>
             <img src="{{ p.featured_image | image_url: width: 320 }}" alt="{{ p.title | escape }}">
           </button>
-          <div class="pc-grid-label">
-            <p class="pc-product-name">{{ p.title }}</p>
-            {%- if p.metafields.custom.height or p.metafields.custom.width -%}
-              <p class="pc-product-meta">
-                {%- if p.metafields.custom.height -%}H: {{ p.metafields.custom.height.value }}{%- endif -%}
-                {%- if p.metafields.custom.height and p.metafields.custom.width -%} • {%- endif -%}
-                {%- if p.metafields.custom.width -%}W: {{ p.metafields.custom.width.value }}{%- endif -%}
-              </p>
-            {%- endif -%}
-          </div>
         </div>
       {%- endif -%}
     {%- endfor -%}
