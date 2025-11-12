@@ -65,7 +65,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyRotationTo(wrapper, rotation) {
     wrapper.dataset.rotation = String(rotation);
-    wrapper.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+    // update full transform (will include any offsets)
+    updateWrapperTransform(wrapper);
+  }
+
+  function updateWrapperTransform(wrapper) {
+    const rot = parseFloat(wrapper.dataset.rotation || '0') || 0;
+    const offX = parseFloat(wrapper.dataset.offsetX || '0') || 0;
+    const offY = parseFloat(wrapper.dataset.offsetY || '0') || 0;
+    wrapper.style.transform = `translate(-50%, -50%) translate(${offX}px, ${offY}px) rotate(${rot}deg)`;
+  }
+
+  function setWrapperOffset(wrapper, offX, offY) {
+    wrapper.dataset.offsetX = String(Math.round(offX));
+    wrapper.dataset.offsetY = String(Math.round(offY));
+    updateWrapperTransform(wrapper);
   }
 
   tbRotateL.addEventListener('click', (e) => {
@@ -139,8 +153,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const wrapper = document.createElement('div');
     wrapper.className = 'pc-layer-wrapper';
     wrapper.dataset.layerId = layerId;
-    wrapper.style.left = xPercent + '%';
-    wrapper.style.top = yPercent + '%';
+    // compute pixel offsets from preview center so position is fixed in pixels
+    const previewRect = preview.querySelector('img')?.getBoundingClientRect();
+    if (previewRect) {
+      const leftPx = (xPercent/100) * previewRect.width;
+      const topPx = (yPercent/100) * previewRect.height;
+      const offsetX = Math.round(leftPx - previewRect.width / 2);
+      const offsetY = Math.round(topPx - previewRect.height / 2);
+      wrapper.style.left = '50%';
+      wrapper.style.top = '50%';
+      setWrapperOffset(wrapper, offsetX, offsetY);
+    } else {
+      // fallback to center
+      wrapper.style.left = '50%';
+      wrapper.style.top = '50%';
+      setWrapperOffset(wrapper, 0, 0);
+    }
   // Set wrapper height based on calculated patchSize (which is height in px)
   wrapper.style.height = patchSize + 'px';
   // compute width from aspect ratio once we load the image below
@@ -181,10 +209,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const rect = preview.querySelector('img')?.getBoundingClientRect();
       const startClientX = e.clientX;
       const startClientY = e.clientY;
-      const startLeft = parseFloat(wrapper.style.left) || 50;
-      const startTop = parseFloat(wrapper.style.top) || 50;
+      const startOffsetX = parseFloat(wrapper.dataset.offsetX || '0') || 0;
+      const startOffsetY = parseFloat(wrapper.dataset.offsetY || '0') || 0;
       const wrapperRect = wrapper.getBoundingClientRect();
-      moving = { pointerId: e.pointerId, startClientX, startClientY, startLeft, startTop, rect, wrapperRect };
+      moving = { pointerId: e.pointerId, startClientX, startClientY, startOffsetX, startOffsetY, rect, wrapperRect };
     }
 
     function onPointerMove(e) {
@@ -195,11 +223,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const dx = e.clientX - moving.startClientX;
       const dy = e.clientY - moving.startClientY;
 
-      // compute new center position in pixels
-      const startLeftPx = (moving.startLeft/100) * rect.width;
-      const startTopPx = (moving.startTop/100) * rect.height;
-      let newLeftPx = startLeftPx + dx;
-      let newTopPx = startTopPx + dy;
+      // new offsets relative to center in px
+      let newOffsetX = moving.startOffsetX + dx;
+      let newOffsetY = moving.startOffsetY + dy;
 
       // compute half size of wrapper so we keep it fully inside
       const wrapperWidth = moving.wrapperRect.width;
@@ -207,24 +233,30 @@ document.addEventListener('DOMContentLoaded', () => {
       const halfW = wrapperWidth / 2;
       const halfH = wrapperHeight / 2;
 
-      // clamp to preview rect
-      newLeftPx = Math.max(halfW, Math.min(rect.width - halfW, newLeftPx));
-      newTopPx = Math.max(halfH, Math.min(rect.height - halfH, newTopPx));
+      // clamp newOffset so wrapper stays inside preview bounds
+      // allowed center X position in px is [halfW, rect.width - halfW]
+      const minOffsetX = halfW - rect.width / 2;
+      const maxOffsetX = (rect.width - halfW) - rect.width / 2;
+      const minOffsetY = halfH - rect.height / 2;
+      const maxOffsetY = (rect.height - halfH) - rect.height / 2;
+      newOffsetX = Math.max(minOffsetX, Math.min(maxOffsetX, newOffsetX));
+      newOffsetY = Math.max(minOffsetY, Math.min(maxOffsetY, newOffsetY));
 
-      // convert back to percent
-      const newLeftPercent = (newLeftPx / rect.width) * 100;
-      const newTopPercent = (newTopPx / rect.height) * 100;
-      wrapper.style.left = newLeftPercent + '%';
-      wrapper.style.top = newTopPercent + '%';
+      setWrapperOffset(wrapper, newOffsetX, newOffsetY);
     }
 
     function onPointerUpMove(e) {
       if (!moving || moving.pointerId !== e.pointerId) return;
       try { wrapper.releasePointerCapture(e.pointerId); } catch(_) {}
       const id = wrapper.dataset.layerId;
-      const xPercent = parseFloat(wrapper.style.left) || 0;
-      const yPercent = parseFloat(wrapper.style.top) || 0;
-      document.dispatchEvent(new CustomEvent('pc:image-layer-moved', { detail: { layerId: id, xPercent, yPercent }, bubbles: true }));
+      const rect = preview.querySelector('img')?.getBoundingClientRect();
+      const offX = parseFloat(wrapper.dataset.offsetX || '0') || 0;
+      const offY = parseFloat(wrapper.dataset.offsetY || '0') || 0;
+      const centerX = rect ? (rect.width / 2 + offX) : offX;
+      const centerY = rect ? (rect.height / 2 + offY) : offY;
+      const xPercent = rect ? (centerX / rect.width) * 100 : 50;
+      const yPercent = rect ? (centerY / rect.height) * 100 : 50;
+      document.dispatchEvent(new CustomEvent('pc:image-layer-moved', { detail: { layerId: id, xPercent, yPercent, offsetX: offX, offsetY: offY }, bubbles: true }));
       moving = null;
     }
 
@@ -340,8 +372,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const offsetY = e.clientY - rect.top;
     const xPercent = Math.max(0, Math.min(1, offsetX / rect.width)) * 100;
     const yPercent = Math.max(0, Math.min(1, offsetY / rect.height)) * 100;
-    activeGhost.style.left = xPercent + '%';
-    activeGhost.style.top = yPercent + '%';
+  // position ghost using pixel offsets from center
+  const ghostLeftPx = (xPercent/100) * rect.width;
+  const ghostTopPx = (yPercent/100) * rect.height;
+  const ghostOffX = Math.round(ghostLeftPx - rect.width / 2);
+  const ghostOffY = Math.round(ghostTopPx - rect.height / 2);
+  activeGhost.style.left = '50%';
+  activeGhost.style.top = '50%';
+  activeGhost.dataset.offsetX = String(ghostOffX);
+  activeGhost.dataset.offsetY = String(ghostOffY);
+  // apply transform with offset (no rotation)
+  activeGhost.style.transform = `translate(-50%, -50%) translate(${ghostOffX}px, ${ghostOffY}px)`;
     return;
   });
   preview.addEventListener('dragleave', () => {
