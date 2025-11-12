@@ -8,6 +8,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const buttons = root.querySelectorAll('.pc-choice');
 
+  // toolbar element for current selection (delete + rotate left/right)
+  const toolbar = document.createElement('div');
+  toolbar.className = 'pc-toolbar';
+  toolbar.style.display = 'none';
+  // delete button
+  const tbDelete = document.createElement('button');
+  tbDelete.type = 'button';
+  tbDelete.title = 'Delete layer';
+  tbDelete.innerHTML = '<span class="icon">×</span>';
+  toolbar.appendChild(tbDelete);
+  // rotate left
+  const tbRotateL = document.createElement('button');
+  tbRotateL.type = 'button';
+  tbRotateL.title = 'Rotate left';
+  tbRotateL.innerHTML = '<span class="icon">⟲</span>';
+  toolbar.appendChild(tbRotateL);
+  // rotate right
+  const tbRotateR = document.createElement('button');
+  tbRotateR.type = 'button';
+  tbRotateR.title = 'Rotate right';
+  tbRotateR.innerHTML = '<span class="icon">⟳</span>';
+  toolbar.appendChild(tbRotateR);
+  preview.appendChild(toolbar);
+
+  let currentSelected = null;
+
+  function showToolbarFor(wrapper) {
+    if (!wrapper) { toolbar.style.display = 'none'; currentSelected = null; return; }
+    currentSelected = wrapper;
+    // position toolbar above the wrapper (prefer top-center)
+    const previewRect = preview.querySelector('img')?.getBoundingClientRect();
+    const wrapRect = wrapper.getBoundingClientRect();
+    if (!previewRect) { toolbar.style.display = 'none'; return; }
+    const left = Math.max(6, wrapRect.left - previewRect.left + wrapRect.width/2 - 40);
+    const top = Math.max(6, wrapRect.top - previewRect.top - 40);
+    toolbar.style.left = left + 'px';
+    toolbar.style.top = top + 'px';
+    toolbar.style.display = 'flex';
+  }
+
+  function hideToolbar() {
+    toolbar.style.display = 'none';
+    currentSelected = null;
+  }
+
+  // toolbar button handlers
+  tbDelete.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!currentSelected) return;
+    const id = currentSelected.dataset.layerId;
+    currentSelected.remove();
+    hideToolbar();
+    document.dispatchEvent(new CustomEvent('pc:image-layer-removed', { detail: { layerId: id }, bubbles: true }));
+  });
+
+  function applyRotationTo(wrapper, rotation) {
+    wrapper.dataset.rotation = String(rotation);
+    wrapper.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+  }
+
+  tbRotateL.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!currentSelected) return;
+    const prev = parseFloat(currentSelected.dataset.rotation || '0');
+    const next = (prev - 15) % 360;
+    applyRotationTo(currentSelected, next);
+    document.dispatchEvent(new CustomEvent('pc:image-layer-rotated', { detail: { layerId: currentSelected.dataset.layerId, rotation: next }, bubbles: true }));
+  });
+
+  tbRotateR.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!currentSelected) return;
+    const prev = parseFloat(currentSelected.dataset.rotation || '0');
+    const next = (prev + 15) % 360;
+    applyRotationTo(currentSelected, next);
+    document.dispatchEvent(new CustomEvent('pc:image-layer-rotated', { detail: { layerId: currentSelected.dataset.layerId, rotation: next }, bubbles: true }));
+  });
+
   function openPreview() {
     // ensure layers container exists on the preview (product image stays as base)
     let layers = preview.querySelector('.pc-layers');
@@ -51,38 +129,23 @@ document.addEventListener('DOMContentLoaded', () => {
     imgEl.alt = alt || '';
     wrapper.appendChild(imgEl);
 
-    const delBtn = document.createElement('button');
-    delBtn.type = 'button';
-    delBtn.className = 'pc-layer-delete';
-    delBtn.innerText = '×';
-    wrapper.appendChild(delBtn);
-
-    const handleEl = document.createElement('div');
-    handleEl.className = 'pc-layer-handle';
-    wrapper.appendChild(handleEl);
-
-    layers.appendChild(wrapper);
+  layers.appendChild(wrapper);
 
     // selection helper
     function selectLayer(wrap) {
       const all = layers.querySelectorAll('.pc-layer-wrapper');
       all.forEach(a => a.classList.remove('is-selected'));
       if (wrap) wrap.classList.add('is-selected');
+      // show toolbar for this selection
+      try { showToolbarFor(wrap); } catch (_) {}
     }
 
-    // delete
-    delBtn.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      const id = wrapper.dataset.layerId;
-      wrapper.remove();
-      document.dispatchEvent(new CustomEvent('pc:image-layer-removed', { detail: { layerId: id }, bubbles: true }));
-    });
+    // no delete/resize/rotate controls: layers are movable only
 
     // pointer-based move with clamping so layer stays fully inside preview
     let moving = null;
     function onPointerDownMove(e) {
       if (e.button && e.button !== 0) return;
-      if (e.target === handleEl || e.target === delBtn) return;
       e.preventDefault();
       selectLayer(wrapper);
       wrapper.setPointerCapture(e.pointerId);
@@ -140,42 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUpMove);
 
-    // resize via handle
-    let resizing = null;
-    function onPointerDownResize(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      wrapper.setPointerCapture(e.pointerId);
-      const rect = preview.querySelector('img')?.getBoundingClientRect();
-      const startClientX = e.clientX;
-      const startWidthPercent = parseFloat(wrapper.style.width) || (wrapper.getBoundingClientRect().width / (rect ? rect.width : 1) * 100);
-      resizing = { pointerId: e.pointerId, startClientX, startWidthPercent, rect };
-    }
-
-    function onPointerMoveResize(e) {
-      if (!resizing || resizing.pointerId !== e.pointerId) return;
-      e.preventDefault();
-      const rect = resizing.rect;
-      if (!rect) return;
-      const dx = e.clientX - resizing.startClientX;
-      const startWidthPx = resizing.startWidthPercent/100 * rect.width;
-      const newWidthPx = Math.max(8, startWidthPx + dx);
-      const newWidthPercent = Math.max(3, Math.min(200, newWidthPx / rect.width * 100));
-      wrapper.style.width = newWidthPercent + '%';
-    }
-
-    function onPointerUpResize(e) {
-      if (!resizing || resizing.pointerId !== e.pointerId) return;
-      try { wrapper.releasePointerCapture(e.pointerId); } catch(_) {}
-      const id = wrapper.dataset.layerId;
-      const widthPercent = parseFloat(wrapper.style.width) || 0;
-      document.dispatchEvent(new CustomEvent('pc:image-layer-resized', { detail: { layerId: id, widthPercent }, bubbles: true }));
-      resizing = null;
-    }
-
-    handleEl.addEventListener('pointerdown', onPointerDownResize);
-    window.addEventListener('pointermove', onPointerMoveResize);
-    window.addEventListener('pointerup', onPointerUpResize);
+    // no rotate/resize handlers; only move interactions
 
     // click selects
     wrapper.addEventListener('click', (ev) => {
@@ -324,6 +352,16 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('dragend', () => {
     if (activeGhost) { activeGhost.remove(); activeGhost = null; activeDragSrc = null; activeDragHandle = null; activeDragIndex = null; }
     preview.classList.remove('is-dragover');
+  });
+
+  // click outside preview clears selection and hides toolbar
+  document.addEventListener('click', (e) => {
+    if (!preview.contains(e.target)) {
+      // clear any selection
+      const all = preview.querySelectorAll('.pc-layer-wrapper.is-selected');
+      all.forEach(a => a.classList.remove('is-selected'));
+      hideToolbar();
+    }
   });
 
   // keep existing preview close behavior
