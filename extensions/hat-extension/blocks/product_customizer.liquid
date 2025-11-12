@@ -18,15 +18,16 @@
   {%- if coll and coll.products_count > 0 -%}
     {%- for p in coll.products -%}
       {%- if p.featured_image != blank -%}
+        {%- assign transparent_img = p.metafields.custom.transparent_image.value | default: p.featured_image -%}
         <div class="pc-grid-item">
           <button class="pc-choice"
                   data-index="{{ forloop.index }}"
-                  data-src="{{ p.featured_image | image_url: width: 1600 }}"
+                  data-src="{{ transparent_img | image_url: width: 1600 }}"
                   data-handle="{{ p.handle }}"
                   data-title="{{ p.title | escape }}"
                   {%- if p.metafields.custom.height -%}data-height="{{ p.metafields.custom.height.value }}"{%- endif -%}
                   {%- if p.metafields.custom.width -%}data-width="{{ p.metafields.custom.width.value }}"{%- endif -%}>
-            <img src="{{ p.featured_image | image_url: width: 320 }}" alt="{{ p.title | escape }}">
+            <img src="{{ transparent_img | image_url: width: 320 }}" alt="{{ p.title | escape }}">
           </button>
         </div>
       {%- endif -%}
