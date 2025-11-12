@@ -16,20 +16,47 @@ document.addEventListener('DOMContentLoaded', () => {
   const tbDelete = document.createElement('button');
   tbDelete.type = 'button';
   tbDelete.title = 'Delete layer';
-  tbDelete.innerHTML = '<span class="icon">×</span>';
+  const deleteIconUrl = root.dataset.deleteIcon || './x-icon.svg';
+  tbDelete.innerHTML = `<span class="icon" aria-hidden="true">
+    <img src="${deleteIconUrl}" width="18" height="18" alt="">
+  </span>`;
   toolbar.appendChild(tbDelete);
   // rotate left
   const tbRotateL = document.createElement('button');
   tbRotateL.type = 'button';
   tbRotateL.title = 'Rotate left';
-  tbRotateL.innerHTML = '<span class="icon">⟲</span>';
+  const rotateLeftIconUrl = root.dataset.rotateLeftIcon || './rotate-left.svg';
+  tbRotateL.innerHTML = `<span class="icon" aria-hidden="true">
+    <img src="${rotateLeftIconUrl}" width="18" height="18" alt="">
+  </span>`;
   toolbar.appendChild(tbRotateL);
   // rotate right
   const tbRotateR = document.createElement('button');
   tbRotateR.type = 'button';
   tbRotateR.title = 'Rotate right';
-  tbRotateR.innerHTML = '<span class="icon">⟳</span>';
+  const rotateRightIconUrl = root.dataset.rotateRightIcon || './rotate-right.svg';
+  tbRotateR.innerHTML = `<span class="icon" aria-hidden="true">
+    <img src="${rotateRightIconUrl}" width="18" height="18" alt="">
+  </span>`;
   toolbar.appendChild(tbRotateR);
+  // send backward (move down)
+  const tbBackward = document.createElement('button');
+  tbBackward.type = 'button';
+  tbBackward.title = 'Send backward';
+  const backwardIconUrl = root.dataset.backwardIcon || './send-backward.svg';
+  tbBackward.innerHTML = `<span class="icon" aria-hidden="true">
+    <img src="${backwardIconUrl}" width="18" height="18" alt="">
+  </span>`;
+  toolbar.appendChild(tbBackward);
+  // bring forward (move up)
+  const tbForward = document.createElement('button');
+  tbForward.type = 'button';
+  tbForward.title = 'Bring forward';
+  const forwardIconUrl = root.dataset.forwardIcon || './bring-forward.svg';
+  tbForward.innerHTML = `<span class="icon" aria-hidden="true">
+    <img src="${forwardIconUrl}" width="18" height="18" alt="">
+  </span>`;
+  toolbar.appendChild(tbForward);
   preview.appendChild(toolbar);
 
   let currentSelected = null;
@@ -98,6 +125,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const next = (prev + 15) % 360;
     applyRotationTo(currentSelected, next);
     document.dispatchEvent(new CustomEvent('pc:image-layer-rotated', { detail: { layerId: currentSelected.dataset.layerId, rotation: next }, bubbles: true }));
+  });
+
+  // layering controls: move backward / forward by reordering DOM in .pc-layers
+  function moveLayerBackward(wrapper) {
+    if (!wrapper) return;
+    const layers = preview.querySelector('.pc-layers');
+    if (!layers) return;
+    const prev = wrapper.previousElementSibling;
+    if (prev && prev.classList && prev.classList.contains('pc-layer-wrapper')) {
+      layers.insertBefore(wrapper, prev);
+      document.dispatchEvent(new CustomEvent('pc:image-layer-order-changed', { detail: { layerId: wrapper.dataset.layerId, direction: 'backward' }, bubbles: true }));
+      showToolbarFor(wrapper);
+    }
+  }
+
+  function moveLayerForward(wrapper) {
+    if (!wrapper) return;
+    const layers = preview.querySelector('.pc-layers');
+    if (!layers) return;
+    const next = wrapper.nextElementSibling;
+    if (next && next.classList && next.classList.contains('pc-layer-wrapper')) {
+      // insert wrapper after next (i.e., before next.nextSibling)
+      layers.insertBefore(wrapper, next.nextElementSibling);
+      document.dispatchEvent(new CustomEvent('pc:image-layer-order-changed', { detail: { layerId: wrapper.dataset.layerId, direction: 'forward' }, bubbles: true }));
+      showToolbarFor(wrapper);
+    }
+  }
+
+  tbBackward.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!currentSelected) return;
+    moveLayerBackward(currentSelected);
+  });
+  tbForward.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!currentSelected) return;
+    moveLayerForward(currentSelected);
   });
 
   function openPreview() {

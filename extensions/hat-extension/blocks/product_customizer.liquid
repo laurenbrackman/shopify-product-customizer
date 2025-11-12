@@ -7,18 +7,14 @@
        {%- if product.metafields.custom.height -%}data-height="{{ product.metafields.custom.height.value }}"{%- endif -%}>
   <button id="pc-export-btn" class="pc-export-btn" type="button">Export PNG</button>
 </div>
-<div class="pc-info">
-  <p><strong>Product:</strong> {{ product.title }}</p>
-  {%- if product.metafields.custom.height -%}
-    <p><strong>Height:</strong> {{ product.metafields.custom.height.value }}</p>
-  {%- endif -%}
-  {%- if product.metafields.custom.width -%}
-    <p><strong>Width:</strong> {{ product.metafields.custom.width.value }}</p>
-  {%- endif -%}
-</div>
 
 {%- assign coll = block.settings.source_collection -%}
-<div id="image-switcher-root" class="pc-grid">
+<div id="image-switcher-root" class="pc-grid"
+     data-delete-icon="{{ 'x-icon.svg' | asset_url }}"
+     data-rotate-left-icon="{{ 'rotate-left.svg' | asset_url }}"
+     data-rotate-right-icon="{{ 'rotate-right.svg' | asset_url }}"
+     data-backward-icon="{{ 'send-backward.svg' | asset_url }}"
+     data-forward-icon="{{ 'bring-forward.svg' | asset_url }}">
   {%- if coll and coll.products_count > 0 -%}
     {%- for p in coll.products -%}
       {%- if p.featured_image != blank -%}
