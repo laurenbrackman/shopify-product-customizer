@@ -80,12 +80,23 @@ document.addEventListener('DOMContentLoaded', () => {
     currentSelected = null;
   }
 
+  // Update z-index for all layers based on their DOM order
+  function updateLayerZIndexes() {
+    const layers = preview.querySelector('.pc-layers');
+    if (!layers) return;
+    const wrappers = layers.querySelectorAll('.pc-layer-wrapper');
+    wrappers.forEach((wrapper, index) => {
+      wrapper.style.zIndex = index + 1;
+    });
+  }
+
   // toolbar button handlers
   tbDelete.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!currentSelected) return;
     const id = currentSelected.dataset.layerId;
     currentSelected.remove();
+    updateLayerZIndexes();
     hideToolbar();
     document.dispatchEvent(new CustomEvent('pc:image-layer-removed', { detail: { layerId: id }, bubbles: true }));
   });
@@ -135,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const prev = wrapper.previousElementSibling;
     if (prev && prev.classList && prev.classList.contains('pc-layer-wrapper')) {
       layers.insertBefore(wrapper, prev);
+      updateLayerZIndexes();
       document.dispatchEvent(new CustomEvent('pc:image-layer-order-changed', { detail: { layerId: wrapper.dataset.layerId, direction: 'backward' }, bubbles: true }));
       showToolbarFor(wrapper);
     }
@@ -148,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (next && next.classList && next.classList.contains('pc-layer-wrapper')) {
       // insert wrapper after next (i.e., before next.nextSibling)
       layers.insertBefore(wrapper, next.nextElementSibling);
+      updateLayerZIndexes();
       document.dispatchEvent(new CustomEvent('pc:image-layer-order-changed', { detail: { layerId: wrapper.dataset.layerId, direction: 'forward' }, bubbles: true }));
       showToolbarFor(wrapper);
     }
@@ -251,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tempImg.src = src;
 
       layers.appendChild(wrapper);
+      updateLayerZIndexes();
 
     // selection helper
     function selectLayer(wrap) {

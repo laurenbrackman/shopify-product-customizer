@@ -130,7 +130,6 @@
 .pc-layer-wrapper.is-selected {
   border-color: #2563eb;
   box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
-  z-index: 999; /* bring selected layer to front */
 }
 .pc-layer-wrapper .pc-layer-img {
   display: block;
