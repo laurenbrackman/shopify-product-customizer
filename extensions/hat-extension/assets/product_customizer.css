@@ -50,3 +50,92 @@
   border-color: #111;
   box-shadow: 0 0 0 2px #111 inset;
 }
+
+/* Visual state for preview when a thumbnail is dragged over it */
+.pc-preview.is-dragover {
+  outline: 3px dashed rgba(17,17,17,0.12);
+  background: #fffaf0;
+}
+
+/* Layers container sits on top of the base preview image and holds absolute-positioned images */
+.pc-layers {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* allow clicks to pass through by default */
+}
+.pc-layer {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  /* default size: 20% of preview width; can be overridden inline */
+  width: 20%;
+  height: auto;
+  max-width: 80%;
+  max-height: 80%;
+  pointer-events: auto; /* allow interaction with layers later (select/move) */
+  cursor: move;
+  user-select: none;
+}
+
+.pc-layer.is-selected {
+  outline: 2px dashed rgba(0,0,0,0.25);
+}
+
+/* Wrapper around each layer image to hold controls and to be the draggable target */
+.pc-layer-wrapper {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  top: 50%;
+  width: 20%;
+  pointer-events: auto;
+  touch-action: none; /* we handle pointer events for dragging/resizing */
+}
+.pc-layer-wrapper .pc-layer-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none; /* pointer events handled on wrapper */
+}
+
+/* Simple delete button placed at the top-right of the layer */
+.pc-layer-delete {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* Resize handle (bottom-right) */
+.pc-layer-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 3px;
+  right: -7px;
+  bottom: -7px;
+  z-index: 2;
+  cursor: nwse-resize;
+}
+
+.pc-layer-wrapper.is-selected {
+  z-index: 999; /* bring selected layer to front */
+}
+
+/* Keep legacy .pc-layer image selector working in case any code expects it */
+.pc-layer { pointer-events: none; }
