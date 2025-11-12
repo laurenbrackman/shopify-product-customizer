@@ -2,9 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const root = document.getElementById('image-switcher-root');
   const preview = document.getElementById('pc-preview');
   const previewImg = document.getElementById('pc-preview-img');
-  const closeBtn = document.querySelector('.pc-preview-close');
   // No upload dropzone: thumbnails are draggable and preview accepts drops
-  if (!root || !preview || !previewImg || !closeBtn) return;
+  if (!root || !preview || !previewImg) return;
 
   const buttons = root.querySelectorAll('.pc-choice');
 
@@ -364,8 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // keep existing preview close behavior
-  closeBtn.addEventListener('click', closePreview);
+  // ESC key still clears selection and hides toolbar
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closePreview();
   });

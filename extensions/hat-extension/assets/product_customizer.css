@@ -92,6 +92,13 @@
   width: 20%;
   pointer-events: auto;
   touch-action: none; /* we handle pointer events for dragging/resizing */
+  border: 2px solid transparent;
+  border-radius: 4px;
+  transition: border-color 100ms ease;
+}
+.pc-layer-wrapper.is-selected {
+  border-color: #2563eb;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
 }
 .pc-layer-wrapper .pc-layer-img {
   display: block;
@@ -112,8 +119,6 @@
 
 /* Ghost while dragging - don't interact with it and hide controls */
 .pc-ghost { pointer-events: none; opacity: 0.9; }
-
-/* Small floating toolbar shown for the selected layer */
 .pc-toolbar {
   position: absolute;
   display: flex;

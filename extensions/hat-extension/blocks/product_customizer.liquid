@@ -1,7 +1,6 @@
 {{ 'product_customizer.css' | asset_url | stylesheet_tag }}
 <h1>Build a Custom Hat</h1>
 <div class="pc-preview" id="pc-preview" aria-hidden="false">
-  <button class="pc-preview-close" type="button" aria-label="Close preview">×</button>
   <img id="pc-preview-img" src="{{ product.featured_image | image_url: width: 1600 }}" alt="{{ product.title | escape }}">
 </div>
 
