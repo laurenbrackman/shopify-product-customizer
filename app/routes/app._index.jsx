@@ -95,109 +95,30 @@ export default function Index() {
 
   return (
     <s-page>
-      <ui-title-bar title="Hat Customizer App">
-        <button variant="primary" onClick={generateProduct}>
-          Generate a product
-        </button>
-      </ui-title-bar>
+      <ui-title-bar title="Hat Customizer App" />
 
       <s-section heading="Welcome to Your Hat Customizer App!">
-        <s-paragraph>This app was created by {" "}
+        <s-paragraph>
+          This app allows customers to create custom hats by adding patches and designs directly on product pages. 
+          Customers can drag and drop patches, position them, rotate them, and layer them to create their perfect custom hat.
+        </s-paragraph>
+        <s-paragraph>
+          The app uses a theme extension that integrates seamlessly with your product pages. 
+          To get started, make sure you have:
+        </s-paragraph>
+        <s-list>
+          <li>A hat product with a mockup image under the transparent_image metafield</li>
+          <li>A collection of patch products, each with transparent_image, height, and width metafields</li>
+          <li>The Product Customizer block added to your product page template</li>
+        </s-list>
+        <s-paragraph>
+          This app was created by{" "}
           <s-link
             href="https://www.laurenbrackman.com"
             target="_blank"
-          >Lauren Brackman Websites
-          </s-link>{" "}.</s-paragraph>
-      </s-section>
-      <s-section heading="Generate a Random Product">
-        <s-paragraph>
-          Generate a product with GraphQL and get the JSON output for that
-          product. Learn more about the{" "}
-          <s-link
-            href="https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate"
-            target="_blank"
           >
-            productCreate
-          </s-link>{" "}
-          mutation in our API references.
-        </s-paragraph>
-        <s-stack direction="inline" gap="base">
-          <s-button
-            onClick={generateProduct}
-            {...(isLoading ? { loading: true } : {})}
-          >
-            Generate a product
-          </s-button>
-          {fetcher.data?.product && (
-            <s-button
-              href={`shopify:admin/products/${productId}`}
-              target="_blank"
-              variant="tertiary"
-            >
-              View product
-            </s-button>
-          )}
-        </s-stack>
-        {fetcher.data?.product && (
-          <s-section heading="productCreate mutation">
-            <s-stack direction="block" gap="base">
-              <s-box
-                padding="base"
-                borderWidth="base"
-                borderRadius="base"
-                background="subdued"
-              >
-                <pre style={{ margin: 0 }}>
-                  <code>{JSON.stringify(fetcher.data.product, null, 2)}</code>
-                </pre>
-              </s-box>
-
-              <s-heading>productVariantsBulkUpdate mutation</s-heading>
-              <s-box
-                padding="base"
-                borderWidth="base"
-                borderRadius="base"
-                background="subdued"
-              >
-                <pre style={{ margin: 0 }}>
-                  <code>{JSON.stringify(fetcher.data.variant, null, 2)}</code>
-                </pre>
-              </s-box>
-            </s-stack>
-          </s-section>
-        )}
-      </s-section>
-
-      <s-section slot="aside" heading="App template specs">
-        <s-paragraph>
-          <s-text>Framework: </s-text>
-          <s-link href="https://reactrouter.com/" target="_blank">
-            React Router
-          </s-link>
-        </s-paragraph>
-        <s-paragraph>
-          <s-text>Interface: </s-text>
-          <s-link
-            href="https://shopify.dev/docs/api/app-home/using-polaris-components"
-            target="_blank"
-          >
-            Polaris web components
-          </s-link>
-        </s-paragraph>
-        <s-paragraph>
-          <s-text>API: </s-text>
-          <s-link
-            href="https://shopify.dev/docs/api/admin-graphql"
-            target="_blank"
-          >
-            GraphQL
-          </s-link>
-        </s-paragraph>
-        <s-paragraph>
-          <s-text>Database: </s-text>
-          <s-link href="https://www.prisma.io/" target="_blank">
-            Prisma
-          </s-link>
+            Lauren Brackman Websites
+          </s-link>.
         </s-paragraph>
       </s-section>
     </s-page>
