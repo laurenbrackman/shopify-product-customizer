@@ -98,18 +98,136 @@ document.addEventListener('DOMContentLoaded', () => {
           const xPercent = Math.max(0, Math.min(1, offsetX / rect.width)) * 100;
           const yPercent = Math.max(0, Math.min(1, offsetY / rect.height)) * 100;
           const layers = preview.querySelector('.pc-layers');
-          const layer = document.createElement('img');
           const layerId = `pc-layer-${Date.now()}-${Math.floor(Math.random()*1000)}`;
-          layer.className = 'pc-layer';
-          layer.dataset.layerId = layerId;
-          layer.src = src;
-          layer.alt = alt || '';
-          // position using percentages so layering stays correct when preview resizes
-          layer.style.left = xPercent + '%';
-          layer.style.top = yPercent + '%';
-          // default size (percentage of preview) - can be adjusted later
-          layer.style.width = '20%';
-          layers.appendChild(layer);
+
+          // create wrapper which will handle pointer interactions
+          const wrapper = document.createElement('div');
+          wrapper.className = 'pc-layer-wrapper';
+          wrapper.dataset.layerId = layerId;
+          wrapper.style.left = xPercent + '%';
+          wrapper.style.top = yPercent + '%';
+          wrapper.style.width = '20%';
+
+          const imgEl = document.createElement('img');
+          imgEl.className = 'pc-layer-img';
+          imgEl.src = src;
+          imgEl.alt = alt || '';
+          wrapper.appendChild(imgEl);
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'pc-layer-delete';
+          delBtn.innerText = '×';
+          wrapper.appendChild(delBtn);
+
+          const handleEl = document.createElement('div');
+          handleEl.className = 'pc-layer-handle';
+          wrapper.appendChild(handleEl);
+
+          layers.appendChild(wrapper);
+
+          // selection helper
+          function selectLayer(wrap) {
+            const all = layers.querySelectorAll('.pc-layer-wrapper');
+            all.forEach(a => a.classList.remove('is-selected'));
+            if (wrap) wrap.classList.add('is-selected');
+          }
+
+          // delete
+          delBtn.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            const id = wrapper.dataset.layerId;
+            wrapper.remove();
+            document.dispatchEvent(new CustomEvent('pc:image-layer-removed', { detail: { layerId: id }, bubbles: true }));
+          });
+
+          // pointer-based move
+          let moving = null;
+          function onPointerDownMove(e) {
+            if (e.button && e.button !== 0) return;
+            // ignore if starting on handle or delete button
+            if (e.target === handleEl || e.target === delBtn) return;
+            e.preventDefault();
+            selectLayer(wrapper);
+            wrapper.setPointerCapture(e.pointerId);
+            const rect = preview.querySelector('img')?.getBoundingClientRect();
+            const startClientX = e.clientX;
+            const startClientY = e.clientY;
+            const startLeft = parseFloat(wrapper.style.left) || 50;
+            const startTop = parseFloat(wrapper.style.top) || 50;
+            moving = { pointerId: e.pointerId, startClientX, startClientY, startLeft, startTop, rect };
+          }
+
+          function onPointerMove(e) {
+            if (!moving || moving.pointerId !== e.pointerId) return;
+            e.preventDefault();
+            const rect = moving.rect;
+            if (!rect) return;
+            const dx = e.clientX - moving.startClientX;
+            const dy = e.clientY - moving.startClientY;
+            const newLeft = ((moving.startLeft/100) * rect.width + dx) / rect.width * 100;
+            const newTop = ((moving.startTop/100) * rect.height + dy) / rect.height * 100;
+            wrapper.style.left = Math.max(0, Math.min(100, newLeft)) + '%';
+            wrapper.style.top = Math.max(0, Math.min(100, newTop)) + '%';
+          }
+
+          function onPointerUpMove(e) {
+            if (!moving || moving.pointerId !== e.pointerId) return;
+            try { wrapper.releasePointerCapture(e.pointerId); } catch(_) {}
+            // dispatch moved event
+            const id = wrapper.dataset.layerId;
+            const xPercent = parseFloat(wrapper.style.left) || 0;
+            const yPercent = parseFloat(wrapper.style.top) || 0;
+            document.dispatchEvent(new CustomEvent('pc:image-layer-moved', { detail: { layerId: id, xPercent, yPercent }, bubbles: true }));
+            moving = null;
+          }
+
+          wrapper.addEventListener('pointerdown', onPointerDownMove);
+          window.addEventListener('pointermove', onPointerMove);
+          window.addEventListener('pointerup', onPointerUpMove);
+
+          // resize via handle
+          let resizing = null;
+          function onPointerDownResize(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            wrapper.setPointerCapture(e.pointerId);
+            const rect = preview.querySelector('img')?.getBoundingClientRect();
+            const startClientX = e.clientX;
+            const startWidthPercent = parseFloat(wrapper.style.width) || (wrapper.getBoundingClientRect().width / (rect ? rect.width : 1) * 100);
+            resizing = { pointerId: e.pointerId, startClientX, startWidthPercent, rect };
+          }
+
+          function onPointerMoveResize(e) {
+            if (!resizing || resizing.pointerId !== e.pointerId) return;
+            e.preventDefault();
+            const rect = resizing.rect;
+            if (!rect) return;
+            const dx = e.clientX - resizing.startClientX;
+            const startWidthPx = resizing.startWidthPercent/100 * rect.width;
+            const newWidthPx = Math.max(8, startWidthPx + dx);
+            const newWidthPercent = Math.max(3, Math.min(200, newWidthPx / rect.width * 100));
+            wrapper.style.width = newWidthPercent + '%';
+          }
+
+          function onPointerUpResize(e) {
+            if (!resizing || resizing.pointerId !== e.pointerId) return;
+            try { wrapper.releasePointerCapture(e.pointerId); } catch(_) {}
+            const id = wrapper.dataset.layerId;
+            const widthPercent = parseFloat(wrapper.style.width) || 0;
+            document.dispatchEvent(new CustomEvent('pc:image-layer-resized', { detail: { layerId: id, widthPercent }, bubbles: true }));
+            resizing = null;
+          }
+
+          handleEl.addEventListener('pointerdown', onPointerDownResize);
+          window.addEventListener('pointermove', onPointerMoveResize);
+          window.addEventListener('pointerup', onPointerUpResize);
+
+          // click selects
+          wrapper.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            selectLayer(wrapper);
+          });
 
           const layerEvent = new CustomEvent('pc:image-layer-added', { detail: { layerId, src, handle, index, xPercent, yPercent }, bubbles: true });
           document.dispatchEvent(layerEvent);
