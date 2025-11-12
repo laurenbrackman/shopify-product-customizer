@@ -1,5 +1,4 @@
 {{ 'product_customizer.css' | asset_url | stylesheet_tag }}
-<h1>Build a Custom Hat</h1>
 {%- assign hat_transparent_img = product.metafields.custom.transparent_image.value | default: product.featured_image -%}
 <div class="pc-preview" id="pc-preview" aria-hidden="false">
   <img id="pc-preview-img" 
