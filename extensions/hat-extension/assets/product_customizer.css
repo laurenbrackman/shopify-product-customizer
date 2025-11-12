@@ -90,6 +90,7 @@
   left: 50%;
   top: 50%;
   width: 20%;
+  aspect-ratio: 1;
   pointer-events: auto;
   touch-action: none; /* we handle pointer events for dragging/resizing */
   border: 2px solid transparent;
@@ -103,7 +104,8 @@
 .pc-layer-wrapper .pc-layer-img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
   user-select: none;
   pointer-events: none; /* pointer events handled on wrapper */
 }
@@ -144,3 +146,30 @@
 }
 .pc-toolbar button:hover { background: rgba(255,255,255,0.06); }
 .pc-toolbar .icon { font-weight: 700; }
+
+/* Export button */
+.pc-export-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 10px 16px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms ease;
+  z-index: 50;
+}
+.pc-export-btn:hover {
+  background: #1d4ed8;
+}
+.pc-export-btn:active {
+  background: #1e40af;
+}
+.pc-export-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}

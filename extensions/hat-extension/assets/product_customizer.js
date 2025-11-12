@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const root = document.getElementById('image-switcher-root');
   const preview = document.getElementById('pc-preview');
   const previewImg = document.getElementById('pc-preview-img');
+  const exportBtn = document.getElementById('pc-export-btn');
   // No upload dropzone: thumbnails are draggable and preview accepts drops
   if (!root || !preview || !previewImg) return;
 
@@ -367,4 +368,81 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closePreview();
   });
+
+  // Export PNG button handler
+  if (exportBtn) {
+    exportBtn.addEventListener('click', async () => {
+      try {
+        exportBtn.disabled = true;
+        exportBtn.textContent = 'Exporting...';
+
+        // Check if html2canvas is available globally, otherwise load from CDN
+        let html2canvas;
+        if (window.html2canvas) {
+          html2canvas = window.html2canvas;
+        } else {
+          // Load html2canvas from CDN dynamically
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+          script.async = true;
+          await new Promise((resolve, reject) => {
+            script.onload = () => {
+              html2canvas = window.html2canvas;
+              resolve();
+            };
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+        }
+
+        // Create a temporary clone of the preview with the same styles
+        const previewClone = preview.cloneNode(true);
+        
+        // Remove the export button from the clone
+        const clonedButton = previewClone.querySelector('#pc-export-btn');
+        if (clonedButton) clonedButton.remove();
+        
+        // Create a temporary container to hold the clone
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'fixed';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '-9999px';
+        tempContainer.style.zIndex = '-9999';
+        tempContainer.appendChild(previewClone);
+        document.body.appendChild(tempContainer);
+
+        // capture the cloned preview element
+        const canvas = await html2canvas(previewClone, {
+          allowTaint: true,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          scale: 2, // Higher scale for better quality
+        });
+
+        // Clean up the temporary container
+        document.body.removeChild(tempContainer);
+
+        // convert to blob and download
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `custom-hat-${Date.now()}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          exportBtn.disabled = false;
+          exportBtn.textContent = 'Export PNG';
+        });
+      } catch (err) {
+        console.error('Export failed:', err);
+        alert('Failed to export PNG. Please try again.');
+        exportBtn.disabled = false;
+        exportBtn.textContent = 'Export PNG';
+      }
+    });
+  }
 });
+

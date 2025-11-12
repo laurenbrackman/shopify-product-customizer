@@ -2,6 +2,7 @@
 <h1>Build a Custom Hat</h1>
 <div class="pc-preview" id="pc-preview" aria-hidden="false">
   <img id="pc-preview-img" src="{{ product.featured_image | image_url: width: 1600 }}" alt="{{ product.title | escape }}">
+  <button id="pc-export-btn" class="pc-export-btn" type="button">Export PNG</button>
 </div>
 
 {%- assign coll = block.settings.source_collection -%}
