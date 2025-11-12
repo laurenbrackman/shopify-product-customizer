@@ -8,6 +8,34 @@
   padding: 10px;
 }
 
+.pc-info {
+  margin-bottom: 14px;
+  font-size: 14px;
+  color: #333;
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 3px solid #2563eb;
+}
+
+.pc-info p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.pc-info p:first-child {
+  margin-top: 0;
+}
+
+.pc-info p:last-child {
+  margin-bottom: 0;
+}
+
+.pc-info strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
 .pc-preview.is-open { display: block; }
 .pc-preview img {
   display: block;
@@ -33,6 +61,13 @@
   grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   gap: 12px;
 }
+
+.pc-grid-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .pc-choice {
   padding: 0;
   border: 2px solid #ddd;
@@ -51,6 +86,31 @@
   box-shadow: 0 0 0 2px #111 inset;
 }
 
+.pc-grid-label {
+  font-size: 12px;
+  text-align: center;
+}
+
+.pc-product-name {
+  margin: 0;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.pc-product-meta {
+  margin: 4px 0 0 0;
+  color: #6b7280;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
 /* Visual state for preview when a thumbnail is dragged over it */
 .pc-preview.is-dragover {
   outline: 3px dashed rgba(17,17,17,0.12);
@@ -66,19 +126,6 @@
   height: 100%;
   pointer-events: none; /* allow clicks to pass through by default */
 }
-.pc-layer {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  /* default size: 20% of preview width; can be overridden inline */
-  width: 20%;
-  height: auto;
-  max-width: 80%;
-  max-height: 80%;
-  pointer-events: auto; /* allow interaction with layers later (select/move) */
-  cursor: move;
-  user-select: none;
-}
-
 .pc-layer.is-selected {
   outline: 2px dashed rgba(0,0,0,0.25);
 }
@@ -89,17 +136,19 @@
   transform: translate(-50%, -50%);
   left: 50%;
   top: 50%;
-  width: 20%;
-  aspect-ratio: 1;
   pointer-events: auto;
   touch-action: none; /* we handle pointer events for dragging/resizing */
   border: 2px solid transparent;
   border-radius: 4px;
   transition: border-color 100ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .pc-layer-wrapper.is-selected {
   border-color: #2563eb;
   box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
+  z-index: 999; /* bring selected layer to front */
 }
 .pc-layer-wrapper .pc-layer-img {
   display: block;
@@ -112,9 +161,6 @@
 
 /* Layers are movable only — no delete/resize/rotate controls */
 
-.pc-layer-wrapper.is-selected {
-  z-index: 999; /* bring selected layer to front */
-}
 
 /* Keep legacy .pc-layer image selector working in case any code expects it */
 .pc-layer { pointer-events: none; }
