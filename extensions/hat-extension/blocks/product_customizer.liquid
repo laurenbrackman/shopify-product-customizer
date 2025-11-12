@@ -1,8 +1,20 @@
 {{ 'product_customizer.css' | asset_url | stylesheet_tag }}
 <h1>Build a Custom Hat</h1>
 <div class="pc-preview" id="pc-preview" aria-hidden="false">
-  <img id="pc-preview-img" src="{{ product.featured_image | image_url: width: 1600 }}" alt="{{ product.title | escape }}">
+  <img id="pc-preview-img" 
+       src="{{ product.featured_image | image_url: width: 1600 }}" 
+       alt="{{ product.title | escape }}"
+       {%- if product.metafields.custom.height -%}data-height="{{ product.metafields.custom.height.value }}"{%- endif -%}>
   <button id="pc-export-btn" class="pc-export-btn" type="button">Export PNG</button>
+</div>
+<div class="pc-info">
+  <p><strong>Product:</strong> {{ product.title }}</p>
+  {%- if product.metafields.custom.height -%}
+    <p><strong>Height:</strong> {{ product.metafields.custom.height.value }}</p>
+  {%- endif -%}
+  {%- if product.metafields.custom.width -%}
+    <p><strong>Width:</strong> {{ product.metafields.custom.width.value }}</p>
+  {%- endif -%}
 </div>
 
 {%- assign coll = block.settings.source_collection -%}
@@ -10,12 +22,27 @@
   {%- if coll and coll.products_count > 0 -%}
     {%- for p in coll.products -%}
       {%- if p.featured_image != blank -%}
-        <button class="pc-choice"
-                data-index="{{ forloop.index }}"
-                data-src="{{ p.featured_image | image_url: width: 1600 }}"
-                data-handle="{{ p.handle }}">
-          <img src="{{ p.featured_image | image_url: width: 320 }}" alt="{{ p.title | escape }}">
-        </button>
+        <div class="pc-grid-item">
+          <button class="pc-choice"
+                  data-index="{{ forloop.index }}"
+                  data-src="{{ p.featured_image | image_url: width: 1600 }}"
+                  data-handle="{{ p.handle }}"
+                  data-title="{{ p.title | escape }}"
+                  {%- if p.metafields.custom.height -%}data-height="{{ p.metafields.custom.height.value }}"{%- endif -%}
+                  {%- if p.metafields.custom.width -%}data-width="{{ p.metafields.custom.width.value }}"{%- endif -%}>
+            <img src="{{ p.featured_image | image_url: width: 320 }}" alt="{{ p.title | escape }}">
+          </button>
+          <div class="pc-grid-label">
+            <p class="pc-product-name">{{ p.title }}</p>
+            {%- if p.metafields.custom.height or p.metafields.custom.width -%}
+              <p class="pc-product-meta">
+                {%- if p.metafields.custom.height -%}H: {{ p.metafields.custom.height.value }}{%- endif -%}
+                {%- if p.metafields.custom.height and p.metafields.custom.width -%} • {%- endif -%}
+                {%- if p.metafields.custom.width -%}W: {{ p.metafields.custom.width.value }}{%- endif -%}
+              </p>
+            {%- endif -%}
+          </div>
+        </div>
       {%- endif -%}
     {%- endfor -%}
   {%- endif -%}

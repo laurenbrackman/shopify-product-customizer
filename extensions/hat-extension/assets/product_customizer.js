@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   const root = document.getElementById('image-switcher-root');
   const preview = document.getElementById('pc-preview');
-  const previewImg = document.getElementById('pc-preview-img');
+  const previewImageEl = document.getElementById('pc-preview-img');
   const exportBtn = document.getElementById('pc-export-btn');
   // No upload dropzone: thumbnails are draggable and preview accepts drops
-  if (!root || !preview || !previewImg) return;
+  if (!root || !preview || !previewImageEl) return;
 
   const buttons = root.querySelectorAll('.pc-choice');
 
@@ -115,21 +115,50 @@ document.addEventListener('DOMContentLoaded', () => {
       const el = document.createElement('div'); el.className = 'pc-layers'; preview.appendChild(el); return el;
     })();
 
+    // Get the patch height and hat height to calculate proper sizing
+    const patchBtn = Array.from(buttons).find(b => (b.dataset.src === src) || (b.dataset.handle && b.dataset.handle === handle));
+  const patchHeight = patchBtn?.dataset?.height ? parseFloat(patchBtn.dataset.height) : null;
+  const hatHeight = previewImageEl?.dataset?.height ? parseFloat(previewImageEl.dataset.height) : null;
+
+    // Calculate patch size based on ratio; default to 200px if heights not available
+    let patchSize = 200; // default size in pixels
+    if (patchHeight && hatHeight && hatHeight > 0) {
+      // Calculate the ratio of patch to hat
+      const heightRatio = patchHeight / hatHeight;
+      // Get the preview image height and scale the patch accordingly
+      const previewImage = preview.querySelector('img');
+      if (previewImage) {
+        const previewHeight = previewImage.clientHeight;
+        patchSize = Math.round(previewHeight * heightRatio);
+        // Clamp size between reasonable bounds
+        patchSize = Math.max(50, Math.min(500, patchSize));
+      }
+    }
+
     const layerId = `pc-layer-${Date.now()}-${Math.floor(Math.random()*1000)}`;
     const wrapper = document.createElement('div');
     wrapper.className = 'pc-layer-wrapper';
     wrapper.dataset.layerId = layerId;
     wrapper.style.left = xPercent + '%';
     wrapper.style.top = yPercent + '%';
-    wrapper.style.width = '20%';
+  // Set wrapper height based on calculated patchSize (which is height in px)
+  wrapper.style.height = patchSize + 'px';
+  // compute width from aspect ratio once we load the image below
 
     const imgEl = document.createElement('img');
     imgEl.className = 'pc-layer-img';
     imgEl.src = src;
     imgEl.alt = alt || '';
     wrapper.appendChild(imgEl);
+      // Load image to get aspect ratio for proper sizing (width = height * aspectRatio)
+      const tempImg = new Image();
+      tempImg.onload = () => {
+        const aspectRatio = tempImg.width / tempImg.height;
+        wrapper.style.width = Math.round(patchSize * aspectRatio) + 'px';
+      };
+      tempImg.src = src;
 
-  layers.appendChild(wrapper);
+      layers.appendChild(wrapper);
 
     // selection helper
     function selectLayer(wrap) {
@@ -264,15 +293,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!activeGhost || activeDragSrc !== src) {
-      // create ghost
+      // create ghost sized the same way final patch will be
       if (activeGhost) activeGhost.remove();
       activeGhost = document.createElement('div');
       activeGhost.className = 'pc-layer-wrapper pc-ghost';
-      activeGhost.style.width = '20%';
+
+      // attempt to size ghost based on metadata
+      const ghostBtn = Array.from(buttons).find(b => (b.dataset.src === src) || (b.dataset.handle && b.dataset.handle === e.dataTransfer.getData('text/x-pc-handle')));
+      const gPatchHeight = ghostBtn?.dataset?.height ? parseFloat(ghostBtn.dataset.height) : null;
+  const gHatHeight = previewImageEl?.dataset?.height ? parseFloat(previewImageEl.dataset.height) : null;
+      let ghostHeight = 200;
+      if (gPatchHeight && gHatHeight && gHatHeight > 0) {
+        const ratio = gPatchHeight / gHatHeight;
+        const pImg = preview.querySelector('img');
+        if (pImg) {
+          const pH = pImg.clientHeight;
+          ghostHeight = Math.round(Math.max(50, Math.min(500, pH * ratio)));
+        }
+      }
+
+      activeGhost.style.height = ghostHeight + 'px';
+
       const img = document.createElement('img');
       img.className = 'pc-layer-img';
       img.src = src;
       img.style.opacity = '0.85';
+      // once image loads, set width to maintain aspect ratio
+      const gImg = new Image();
+      gImg.onload = () => {
+        const ar = gImg.width / gImg.height;
+        activeGhost.style.width = Math.round(ghostHeight * ar) + 'px';
+      };
+      gImg.src = src;
+
       activeGhost.appendChild(img);
       layers.appendChild(activeGhost);
       activeDragSrc = src;
