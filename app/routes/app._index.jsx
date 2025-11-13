@@ -20,10 +20,10 @@ export const action = async ({ request }) => {
     const metafieldsToCreate = [
       {
         namespace: "custom",
-        key: "transparent_image",
-        name: "Transparent Image",
-        description: "Transparent product image for hat customizer",
-        type: "file_reference",
+        key: "mockup_photos",
+        name: "Mockup Photos",
+        description: "Mockup photos for hat customizer",
+        type: "list.file_reference",
         ownerType: "PRODUCT",
       },
       {
@@ -31,7 +31,7 @@ export const action = async ({ request }) => {
         key: "height",
         name: "Height",
         description: "Product height in inches for hat customizer scaling",
-        type: "number_decimal",
+        type: "dimension",
         ownerType: "PRODUCT",
       },
       {
@@ -39,7 +39,7 @@ export const action = async ({ request }) => {
         key: "width",
         name: "Width",
         description: "Product width in inches for hat customizer scaling",
-        type: "number_decimal",
+        type: "dimension",
         ownerType: "PRODUCT",
       },
     ];
