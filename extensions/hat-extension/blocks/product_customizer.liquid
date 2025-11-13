@@ -1,8 +1,11 @@
 {{ 'product_customizer.css' | asset_url | stylesheet_tag }}
 {%- liquid
-  assign should_display = false
-  if block.settings.display_tag != blank and product.tags contains block.settings.display_tag
-    assign should_display = true
+  assign should_display = true
+  if block.settings.display_tag != blank
+    assign should_display = false
+    if product.tags contains block.settings.display_tag
+      assign should_display = true
+    endif
   endif
 -%}
 
