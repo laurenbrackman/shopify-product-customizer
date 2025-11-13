@@ -19,7 +19,7 @@ api_version = "2025-10"
   uri = "/webhooks/app/scopes_update"
 
 [access_scopes]
-scopes = "write_files,read_files"
+scopes = "write_files,read_files,write_products,read_products"
 
 [auth]
 redirect_urls = [ "https://example.com/api/auth" ]
