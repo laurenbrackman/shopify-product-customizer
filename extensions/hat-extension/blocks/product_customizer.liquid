@@ -1,15 +1,4 @@
 {{ 'product_customizer.css' | asset_url | stylesheet_tag }}
-{%- liquid
-  assign should_display = true
-  if block.settings.display_tag != blank
-    assign should_display = false
-    if product.tags contains block.settings.display_tag
-      assign should_display = true
-    endif
-  endif
--%}
-
-{%- if should_display -%}
 <div class="pc-container" style="padding-top: {{ block.settings.padding_top }}px; padding-bottom: {{ block.settings.padding_bottom }}px;">
 {%- if block.settings.heading != blank -%}
   <h2>{{ block.settings.heading }}</h2>
@@ -53,7 +42,6 @@
   {%- endif -%}
 </div>
 </div>
-{%- endif -%}
 
 {% schema %}
 {
@@ -62,12 +50,6 @@
   "templates": ["product"],
   "settings": [
     
-    {
-      "type": "text",
-      "id": "display_tag",
-      "label": "Product tag to match",
-      "info": "Enter a single tag. The block will show when the product has this tag."
-    },
     {
       "type": "text",
       "id": "heading",
@@ -108,4 +90,8 @@
 }
 {% endschema %}
 
+{{ 'pc-utils.js' | asset_url | script_tag }}
+{{ 'pc-toolbar.js' | asset_url | script_tag }}
+{{ 'pc-layers.js' | asset_url | script_tag }}
+{{ 'pc-export.js' | asset_url | script_tag }}
 {{ 'product_customizer.js' | asset_url | script_tag }}

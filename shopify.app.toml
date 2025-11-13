@@ -1,5 +1,3 @@
-# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
-
 client_id = "7c2b2d57c7c933a52a307084f55b1dee"
 name = "custom-hat-builder"
 application_url = "https://example.com"
@@ -21,8 +19,16 @@ api_version = "2025-10"
   uri = "/webhooks/app/scopes_update"
 
 [access_scopes]
-# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "write_files,read_files"
 
 [auth]
 redirect_urls = [ "https://example.com/api/auth" ]
+
+[app_proxy]
+# Shopify will forward storefront requests from:
+#   /apps/hat-customizer/<anything>
+# to your app at:
+#   https://example.com/proxy/<anything>
+url = "https://example.com/proxy"
+subpath = "hat-customizer"
+prefix = "apps"
