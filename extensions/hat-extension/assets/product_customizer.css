@@ -13,6 +13,26 @@
   border-radius: 10px;
   background: #fff;
   padding: 10px;
+  min-height: 300px;
+}
+
+.pc-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  background: #f8f9fa;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.pc-placeholder p {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+  max-width: 200px;
+  line-height: 1.4;
 }
 
 .pc-info {
@@ -41,6 +61,80 @@
 .pc-info strong {
   color: #1f2937;
   font-weight: 600;
+}
+
+/* Section titles */
+.pc-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 20px 0 12px 0;
+}
+
+/* Hat selection section */
+.pc-hat-selection {
+  margin-bottom: 24px;
+}
+
+.pc-hat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.pc-hat-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.pc-hat-choice {
+  padding: 0;
+  border: 3px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  display: block;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.pc-hat-choice:hover {
+  border-color: #999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.pc-hat-choice.is-selected {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #2563eb inset;
+}
+
+.pc-hat-choice img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fff;
+}
+
+.pc-hat-label {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  font-weight: 500;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Patches section */
+.pc-patches-section {
+  margin-bottom: 24px;
 }
 
 .pc-preview.is-open { display: block; }
@@ -213,24 +307,7 @@
   position: absolute;
   bottom: 10px;
   right: 10px;
-  padding: 10px 16px;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
   cursor: pointer;
   transition: background 150ms ease;
   z-index: 50;
-}
-.pc-export-btn:hover {
-  background: #1d4ed8;
-}
-.pc-export-btn:active {
-  background: #1e40af;
-}
-.pc-export-btn:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
 }

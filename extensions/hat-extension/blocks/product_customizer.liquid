@@ -7,52 +7,93 @@
   <p class="pc-description">{{ block.settings.description }}</p>
 {%- endif -%}
 
-{% assign hat_transparent_img = product.metafields.custom.mockup_photos.value %}
-{% for file_link in hat_transparent_img%}
-<div class="pc-preview" id="pc-preview" aria-hidden="false">
-  <img id="pc-preview-img" 
-       src="{{ file_link | image_url: width: 1600 }}" 
-       alt="{{ product.title | escape }}"
-       {%- if product.metafields.custom.height -%}data-height="{{ product.metafields.custom.height.value }}"{%- endif -%}>
-  <button id="pc-export-btn" class="pc-export-btn" type="button">Export PNG</button>
-</div>
-{% endfor %}
+{%- assign base_hat_image = null -%}
+{%- assign hat_title = "Custom Hat" -%}
+{%- assign hat_height = null -%}
+{%- assign selected_hat_handle = null -%}
 
-{%- assign coll = block.settings.source_collection -%}
-<div id="image-switcher-root" class="pc-grid"
-     data-delete-icon="{{ 'x-icon.svg' | asset_url }}"
-     data-rotate-left-icon="{{ 'rotate-left.svg' | asset_url }}"
-     data-rotate-right-icon="{{ 'rotate-right.svg' | asset_url }}"
-     data-backward-icon="{{ 'send-backward.svg' | asset_url }}"
-     data-forward-icon="{{ 'bring-forward.svg' | asset_url }}">
-  {%- if coll and coll.products_count > 0 -%}
-    {%- for p in coll.products -%}
-      {%- if p.featured_image != blank -%}
-        {% assign transparent_img = p.metafields.custom.mockup_photos.value %}
-        {% for file_link in transparent_img%}
-        <div class="pc-grid-item">
-          <button class="pc-choice"
-                  data-index="{{ forloop.index }}"
-                  data-src="{{ file_link | image_url: width: 1600 }}"
-                  data-handle="{{ p.handle }}"
-                  data-title="{{ p.title | escape }}"
-                  {%- if p.metafields.custom.height -%}data-height="{{ p.metafields.custom.height.value }}"{%- endif -%}
-                  {%- if p.metafields.custom.width -%}data-width="{{ p.metafields.custom.width.value }}"{%- endif -%}>
-            <img src="{{ file_link | image_url: width: 320 }}" alt="{{ p.title | escape }}">
+{%- if product and product.metafields.custom.mockup_photos.value -%}
+  {%- assign base_hat_image = product.metafields.custom.mockup_photos.value.first -%}
+  {%- assign hat_title = product.title -%}
+  {%- assign hat_height = product.metafields.custom.height.value -%}
+  {%- assign selected_hat_handle = product.handle -%}
+{%- endif -%}
+
+{%- if base_hat_image -%}
+<div class="pc-preview" id="pc-preview" aria-hidden="false" data-selected-hat="{{ selected_hat_handle }}">
+  <img id="pc-preview-img" 
+       src="{{ base_hat_image | image_url: width: 1600 }}" 
+       alt="{{ hat_title | escape }}"
+       {%- if hat_height -%}data-height="{{ hat_height }}"{%- endif -%}>
+  <button id="pc-export-btn" class="pc-export-btn button" type="button">Export PNG</button>
+</div>
+{%- else -%}
+<div class="pc-preview" id="pc-preview" aria-hidden="false">
+  <div class="pc-placeholder">
+    <p>Choose a hat to start customizing</p>
+  </div>
+  <button id="pc-export-btn" class="pc-export-btn button" type="button">Export PNG</button>
+</div>
+{%- endif -%}
+
+<div class="pc-hat-selection">
+  <h3 class="pc-section-title">Choose Your Hat:</h3>
+  <div class="pc-hat-grid">
+    {% for product in collections['hats'].products %}
+      {% assign hat_photos = product.metafields.custom.mockup_photos.value %}
+      {% for photo in hat_photos %}
+        <div class="pc-hat-option">
+          <button class="pc-hat-choice"
+                  data-hat-handle="{{ product.handle }}"
+                  data-hat-src="{{ photo | image_url: width: 1600 }}"
+                  data-hat-title="{{ product.title | escape }}"
+                  {%- if product.metafields.custom.height -%}data-hat-height="{{ product.metafields.custom.height.value }}"{%- endif -%}>
+            <img class="hatPhoto" src="{{ photo | image_url: height: 200 }}" alt="{{ product.title | escape }}">
           </button>
+          <span class="pc-hat-label">{{ product.title | truncate: 15 }}</span>
         </div>
       {%- endfor -%}
-      {%- endif -%}
     {%- endfor -%}
-  {%- endif -%}
+  </div>
 </div>
+
+{%- assign coll = block.settings.source_collection -%}
+{%- if coll and coll.products_count > 0 -%}
+<div class="pc-patches-section">
+  <h3 class="pc-section-title">Choose Your Patches:</h3>
+  <div id="image-switcher-root" class="pc-grid"
+       data-delete-icon="{{ 'x-icon.svg' | asset_url }}"
+       data-rotate-left-icon="{{ 'rotate-left.svg' | asset_url }}"
+       data-rotate-right-icon="{{ 'rotate-right.svg' | asset_url }}"
+       data-backward-icon="{{ 'send-backward.svg' | asset_url }}"
+       data-forward-icon="{{ 'bring-forward.svg' | asset_url }}">
+    {%- assign patch_index = 0 -%}
+    {%- for p in coll.products -%}
+      {%- assign mockup_photos = p.metafields.custom.mockup_photos.value -%}
+        {%- for photo in mockup_photos -%}
+          {%- assign patch_index = patch_index | plus: 1 -%}
+          <div class="pc-grid-item">
+          <button class="pc-choice"
+                    data-index="{{ patch_index }}"
+                    data-src="{{ photo | image_url: width: 1600 }}"
+                    data-handle="{{ p.handle }}-patch-{{ forloop.index }}"
+                    data-title="{{ p.title | escape }} - Patch {{ forloop.index }}"
+                    {%- if p.metafields.custom.height -%}data-height="{{ p.metafields.custom.height.value }}"{%- endif -%}
+                    {%- if p.metafields.custom.width -%}data-width="{{ p.metafields.custom.width.value }}"{%- endif -%}>
+          <img src="{{ photo | image_url: width: 320 }}" alt="{{ p.title | escape }} - Patch {{ forloop.index }}">
+          </button>
+          </div>
+        {%- endfor -%}
+    {%- endfor -%}
+  </div>
+</div>
+{%- endif -%}
 </div>
 
 {% schema %}
 {
-  "name": "Product Customizer",
+  "name": "Hat Customizer",
   "target": "section",
-  "templates": ["product"],
   "settings": [
     
     {
