@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initialize layers system with new preview image
         if (window.PCLayers && window.PCLayers.init) {
           layersAPI = window.PCLayers.init(preview, previewImageEl, updatedButtons, toolbar);
+          addPatchClickHandlers();
         }
       }
       
@@ -68,6 +69,70 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Add click handlers to patch choices to spawn patches
+  function addPatchClickHandlers() {
+    const patchChoices = root.querySelectorAll('.pc-choice');
+    patchChoices.forEach(patchChoice => {
+      // Remove existing click handlers to avoid duplicates
+      patchChoice.removeEventListener('click', handlePatchClick);
+      
+      // Add click handler
+      patchChoice.addEventListener('click', handlePatchClick);
+    });
+  }
+  
+  function handlePatchClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Only spawn if we have a preview image (hat selected)
+    if (!previewImageEl) {
+      alert('Please select a hat first');
+      return;
+    }
+    
+    const button = e.currentTarget;
+    const src = button.dataset.src;
+    const handle = button.dataset.handle;
+    const title = button.dataset.title;
+    const index = button.dataset.index;
+    
+    // Create a synthetic drop event at center of preview
+    const rect = preview.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // Create and dispatch a synthetic drop event
+    const dropEvent = new DragEvent('drop', {
+      bubbles: true,
+      clientX: centerX,
+      clientY: centerY,
+      dataTransfer: new DataTransfer()
+    });
+    
+    // Set data transfer properties
+    try {
+      dropEvent.dataTransfer.setData('text/plain', src);
+      dropEvent.dataTransfer.setData('text/x-pc-handle', handle);
+      dropEvent.dataTransfer.setData('text/x-pc-index', index);
+    } catch(e) {
+      // Fallback for browsers that don't allow setting data on synthetic events
+      Object.defineProperty(dropEvent, 'dataTransfer', {
+        value: {
+          getData: (type) => {
+            if (type === 'text/plain') return src;
+            if (type === 'text/x-pc-handle') return handle;
+            if (type === 'text/x-pc-index') return index;
+            return '';
+          }
+        }
+      });
+    }
+    
+    // Dispatch the drop event on the preview
+    preview.dispatchEvent(dropEvent);
+  }
+
   let layersAPI = {};
 
   const toolbar = window.PCToolbar && window.PCToolbar.create
@@ -84,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.PCLayers && window.PCLayers.init && previewImageEl) {
     const initialButtons = root.querySelectorAll('.pc-choice');
     layersAPI = window.PCLayers.init(preview, previewImageEl, initialButtons, toolbar);
+    addPatchClickHandlers();
   }
 
   // ESC handler
